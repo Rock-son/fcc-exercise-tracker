@@ -1,11 +1,21 @@
+"use strict";
+
+if (process.env.NODE_ENV !== "production" ) {
+	require("dotenv").config();
+}
+
+
 const express = require('express')
+const path = require("path")
 const app = express()
 const bodyParser = require('body-parser')
+const router = require("./server-router.js")
 
 const cors = require('cors')
 
 const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+mongoose.Promise = global.Promise
+mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track', { useMongoClient: true, autoIndex: false } )
 
 app.use(cors())
 
@@ -13,11 +23,12 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 
-app.use(express.static('public'))
+app.use(express.static(path.join('public')))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+router(app);
 
 // Not found middleware
 app.use((req, res, next) => {
@@ -43,9 +54,8 @@ app.use((err, req, res, next) => {
     .send(errMessage)
 })
 
-
-
-
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
+module.exports.app = app;
