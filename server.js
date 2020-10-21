@@ -15,7 +15,7 @@ const cors = require('cors')
 
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/exercise-track', { useNewUrlParser: true } )
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/exercise-track', { useNewUrlParser: true, useMongoClient: true } )
 
 app.use(cors())
 
