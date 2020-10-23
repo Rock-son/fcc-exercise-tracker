@@ -23,7 +23,7 @@ exports.createNewUser = function(res, userName) {
 		NewUser.save(function(error, user) {
 			if (error) {
 				console.log(error.message);
-				return res.status(400).send("Something went wrong!");
+				return res.status(402).send("The following error occured, when saving the user: " + error.message );
 			}
 			return res.send({ username: user.userName, userId: user._id.toString() });
 		});
@@ -68,7 +68,8 @@ exports.setExercises = function(res, { userId, description, duration, date }) {
 		})
 		exercise.save((err) => {
 			if (err) {
-				return res.status(402).send("Something went wrong, when saving the user.");
+				console.log(err.message);
+				return res.status(402).send("The following error occured, when saving the exercise: " + err.message );
 			}
 
 			return res.status(200).send({
