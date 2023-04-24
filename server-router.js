@@ -21,7 +21,7 @@ module.exports = function(app) {
 			setTimeout(() => res.status(400).send({ error: "You need to input duration!" }), 300)
 		} else {
 			const checkedDate = date || new Date()
-			db.setExercises(res, userId, description, duration, checkedDate)
+			db.setExercises(res, { userId, description, duration, checkedDate })
 		}
 	});
 
@@ -38,4 +38,3 @@ module.exports = function(app) {
 		db.getAllUsers(res);
 	})
 }
-

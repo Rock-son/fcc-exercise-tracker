@@ -9,20 +9,22 @@ const { ExerciseSchema, ExerciseUser } = require("./model");
 
 exports.createNewUser = function(res, userName) {
 	const sanitizedUserName = MONGO_SANITIZE(userName);
-// IF EXISTING USER - RETURN ERROR
+	// IF EXISTING USER - RETURN ERROR
 	ExerciseUser.findOne({ userName: sanitizedUserName }, function(err, user) {
-		if (err) { return res.status(400).send(err); }
+		if (err) {
+			return res.status(400).send("Something went wrong!");
+		}
 
 		if (user) {
 			return res.status(200).send({ error: "User already exists. Chose another username."});
 		}
-// ELSE SAVE NEW USER AND RETURN USER_ID
+		// ELSE SAVE NEW USER AND RETURN USER_ID
 		const NewUser = new ExerciseUser({ userName: sanitizedUserName });
 		NewUser.save(function(error, user) {
 			if (error) {
-				return res.send(error);
+				console.log(error.message);
+				return res.status(402).send("The following error occured, when saving the user: " + error.message );
 			}
-
 			return res.send({ username: user.userName, userId: user._id.toString() });
 		});
 	});
@@ -30,7 +32,9 @@ exports.createNewUser = function(res, userName) {
 
 exports.getAllUsers = function(res) {
 	ExerciseUser.find({}, function(err, users) {
-		if (err) { return res.status(400).send(err); }
+		if (err) {
+			return res.status(400).send("Something went wrong!");
+		}
 
 		if (users) {
 			return res.status(200).send({ users: users });
@@ -39,7 +43,7 @@ exports.getAllUsers = function(res) {
 	})
 }
 
-exports.setExercises = function(res, userId, description, duration, date) {
+exports.setExercises = function(res, { userId, description, duration, date }) {
 	const sanUserId = mongoose.Types.ObjectId(MONGO_SANITIZE(userId));
 	const sanDescription = MONGO_SANITIZE(description);
 	const sanDuration = MONGO_SANITIZE(duration);
@@ -47,7 +51,9 @@ exports.setExercises = function(res, userId, description, duration, date) {
 
 // IF USER NOT EXISTS RETURN ERROR, ELSE SAVE DATA
 	ExerciseUser.findById(sanUserId, function(err, user) {
-		if (err) { return res.status(400).send(err); }
+		if (err) {
+			return res.status(400).send("Something went wrong!");
+		}
 
 		if (!user) {
 			return res.status(200).send({ error: "User does not exist. You have to create a username first."});
@@ -61,7 +67,10 @@ exports.setExercises = function(res, userId, description, duration, date) {
 			date: sandDate
 		})
 		exercise.save((err) => {
-			if (err) { return res.status(402).send(err); }
+			if (err) {
+				console.log(err.message);
+				return res.status(402).send("The following error occured, when saving the exercise: " + err.message );
+			}
 
 			return res.status(200).send({
 				username: exercise.userName,
@@ -84,20 +93,22 @@ exports.getExercises = function(res, { userId, from, to, limit }) {
 	}
 
 	ExerciseSchema.find({ userId: sanUserId, date: { $gte: sanFromDate, $lte: sanToDate } },
-							{ _id: 0, userName: 1, description: 1, duration: 1, date: 1}, function(err, results) {
-			if (err) { return res.status(400).send(err); }
+		{ _id: 0, userName: 1, description: 1, duration: 1, date: 1}, function(err, results) {
+		if (err) {
+			return res.status(400).send("Something went wrong!");
+		}
 
-			if (results.length) {
-				return res.status(200).send({
-					_id: sanUserId,
-					username: results[0].userName,
-					count: results.length,
-					log: results.map(item => ({
-						description: item.description,
-						duration: item.duration,
-						date: item.date
-					}))
-				});
-			}
-		}).limit(parseInt(sanLimit))
+		if (results.length) {
+			return res.status(200).send({
+				_id: sanUserId,
+				username: results[0].userName,
+				count: results.length,
+				log: results.map(item => ({
+					description: item.description,
+					duration: item.duration,
+					date: item.date
+				}))
+			});
+		}
+	}).limit(parseInt(sanLimit))
 }

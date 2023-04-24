@@ -15,8 +15,9 @@ const cors = require('cors')
 
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track', { useMongoClient: true, autoIndex: false } )
-
+mongoose.connect(process.env.MONGODB_URI || `mongodb+srv://${process.env.user}:${process.env.password}@cluster0.ohsrq.mongodb.net/${process.env.db}?retryWrites=true&w=majority;`, { useNewUrlParser: true, useUnifiedTopology: true } )
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
 app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
